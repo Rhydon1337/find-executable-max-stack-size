@@ -1,4 +1,4 @@
-# find-executable-max-stack-size
+# find-binary-max-stack-size
 
 ## TL;DR 
 Find binary max stack size using IDA python
