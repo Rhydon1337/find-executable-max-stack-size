@@ -10,19 +10,23 @@ class FunctionTree(object):
         self.function_start_address = function_start_address
         self.max_stack_size = 0
 
-    def find_function_max_stack_size(self):
-        current_tree_stack_size = idc.get_frame_size(self.function_start_address)
-        if len(self.children) == 0:
-            self.max_stack_size = current_tree_stack_size
-            return
 
-        max_overall_size = 0
-        for function_tree in self.children:
-            function_tree.find_function_max_stack_size()
+def find_function_max_stack_size(function_tree) -> int:
+    nodes_stack = []
 
-            max_overall_size = max(max_overall_size, current_tree_stack_size + function_tree.max_stack_size)
+    current_node = function_tree
+    max_stack_size = idc.get_frame_size(function_tree.function_start_address)
 
-        self.max_stack_size = max_overall_size
+    nodes_stack.append((current_node, max_stack_size))
+
+    while len(nodes_stack) > 0:
+        current_node, temp_max_stack_size = nodes_stack.pop()
+        for child in current_node.children:
+            nodes_stack.append((child, temp_max_stack_size + idc.get_frame_size(child.function_start_address)))
+
+        max_stack_size = max(max_stack_size, temp_max_stack_size)
+
+    return max_stack_size
 
 
 def get_root_functions() -> [FunctionTree]:
@@ -79,7 +83,7 @@ def main():
 
     function_with_max_stack_size = root_functions[0]
     for root_function in root_functions:
-        root_function.find_function_max_stack_size()
+        root_function.max_stack_size = find_function_max_stack_size(root_function)
         print_function(root_function.function_start_address, root_function.max_stack_size)
 
         function_with_max_stack_size = max(function_with_max_stack_size, root_function,
