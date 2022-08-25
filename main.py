@@ -36,8 +36,11 @@ def get_root_functions() -> [FunctionTree]:
             all_functions[function_start] = function_tree
 
         number_of_iterations = 0
-        xrefs = idautils.CodeRefsTo(function_start, 0)
+        xrefs = idautils.CodeRefsTo(function_start, False)
         for xref in xrefs:
+            if idaapi.get_func(xref.real) is None:
+                continue
+
             number_of_iterations += 1
 
             xref_function_start = idaapi.get_func(xref.real).start_ea
@@ -48,7 +51,8 @@ def get_root_functions() -> [FunctionTree]:
                 xref_function_tree = FunctionTree(xref_function_start)
                 all_functions[xref_function_start] = xref_function_tree
 
-            xref_function_tree.children.add(function_tree)
+            if xref_function_tree.function_start_address != function_tree.function_start_address:
+                xref_function_tree.children.add(function_tree)
 
         if number_of_iterations == 0:
             function_tree.is_root = True
@@ -60,7 +64,8 @@ def print_function(function_address, max_stack_size):
     function_name = idaapi.get_func_name(function_address)
     if len(function_name) == 0:
         print(
-            f"Root function address is: {hex(function_address)}, max stack size is: {hex(max_stack_size)}")
+            f"Root function address is: {hex(function_address)}, "
+            f"max stack size is: {hex(max_stack_size)}")
     else:
         print(
             f"Root function name is: {function_name}, "
