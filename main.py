@@ -15,14 +15,24 @@ def find_function_max_stack_size(function_tree) -> int:
     nodes_stack = []
 
     current_node = function_tree
+
     max_stack_size = idc.get_frame_size(function_tree.function_start_address)
 
-    nodes_stack.append((current_node, max_stack_size))
+    parents = set()
+    parents.add(current_node.function_start_address)
+
+    nodes_stack.append((parents, current_node, max_stack_size))
 
     while len(nodes_stack) > 0:
-        current_node, temp_max_stack_size = nodes_stack.pop()
+        parents, current_node, temp_max_stack_size = nodes_stack.pop()
         for child in current_node.children:
-            nodes_stack.append((child, temp_max_stack_size + idc.get_frame_size(child.function_start_address)))
+            if child.function_start_address in parents:
+                # Found recursion - skipping
+                continue
+
+            parents = parents.copy()
+            parents.add(child.function_start_address)
+            nodes_stack.append((parents, child, temp_max_stack_size + idc.get_frame_size(child.function_start_address)))
 
         max_stack_size = max(max_stack_size, temp_max_stack_size)
 
