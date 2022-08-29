@@ -1,14 +1,19 @@
+from dataclasses import dataclass, field
+
 import idautils
 import idaapi
 import idc
 
 
-class FunctionTree(object):
-    def __init__(self, function_start_address: int):
-        self.is_root = False
-        self.children = set()
-        self.function_start_address = function_start_address
-        self.max_stack_size = 0
+@dataclass
+class FunctionTree:
+    function_start_address: int
+    max_stack_size: int = 0
+    is_root: bool = False
+    children: set = field(default_factory=set)
+
+    def __hash__(self):
+        return self.function_start_address
 
 
 def find_function_max_stack_size(function_tree) -> int:
