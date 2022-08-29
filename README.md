@@ -19,6 +19,6 @@ File -> Script file -> {path_to_main.py}
 
 ## Limitations
 1. There is no support on recursion the code will detect it and skip it
-2. *The code is written in Python3. Therefore, you should only run it on IDA that comes with python3*
+2. *The code is written in Python3. Therefore, you should only run it on IDA that comes with python3.7+*
 
 DONE!!!
